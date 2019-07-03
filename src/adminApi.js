@@ -1,6 +1,8 @@
 import createRouter from './router';
 import requester from './requester';
 import { parseVersion } from './utils.js'
+var url = require('url');
+
 
 let pluginSchemasCache;
 let kongVersionCache;
@@ -109,8 +111,14 @@ function getPaginatedJson(uri) {
             // FIXME an hopeful hack to prevent a loop
             return json.data;
         }
+        
+        const originalUrl = url.parse(uri)
+        const nextUrl = url.parse(next)
 
-        return getPaginatedJson(json.next).then(data => json.data.concat(data));
+        originalUrl.search = nextUrl.search;
+        const next = url.format(originalUrl)
+
+        return getPaginatedJson(next).then(data => json.data.concat(data));
     });
 }
 
